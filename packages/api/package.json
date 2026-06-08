@@ -13,8 +13,8 @@
     "start:debug": "bun --inspect --watch src/main.ts",
     "start:prod": "bun dist/src/main.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "generate": "bunx prisma generate",
-    "migrate": "bunx prisma migrate deploy"
+    "generate": "bun --bun x prisma generate",
+    "migrate": "bun --bun x prisma migrate deploy"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
