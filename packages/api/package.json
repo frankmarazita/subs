@@ -7,12 +7,14 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
+    "postinstall": "bunx prisma generate",
     "build": "nest build",
     "start": "bun src/main.ts",
     "start:dev": "bun --watch src/main.ts",
     "start:debug": "bun --inspect --watch src/main.ts",
     "start:prod": "bun dist/src/main.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
+    "generate": "bunx prisma generate",
     "migrate": "bunx prisma migrate deploy"
   },
   "dependencies": {

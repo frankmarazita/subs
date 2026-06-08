@@ -6,6 +6,13 @@ A terminal-based YouTube subscription manager.
 
 Three packages in a monorepo: `api` is a NestJS backend backed by PostgreSQL that fetches videos from YouTube RSS feeds. `cli` is a React Ink terminal UI compiled to a standalone binary. `contracts` holds the shared ts-rest API types used by both.
 
+## Local Development
+
+1. Copy `packages/api/.env.example` to `packages/api/.env` and set `DATABASE_URL`
+2. Install dependencies: `bun install`
+3. Generate the Prisma client: `bun run --filter api generate`
+4. Start the API: `bun run --filter api start:dev`
+
 ## Running the API
 
 Requires a PostgreSQL database.

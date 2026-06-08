@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EventsGateway } from '../events/events.gateway.js';
 
@@ -25,11 +26,15 @@ export class HistoryService {
         `Video ${videoId} not found. Refresh videos first.`,
       );
     }
-    await this.prisma.watchHistory.upsert({
-      where: { videoId },
-      create: { videoId, watchedAt: BigInt(Date.now()) },
-      update: {},
-    });
+    try {
+      await this.prisma.watchHistory.upsert({
+        where: { videoId },
+        create: { videoId, watchedAt: BigInt(Date.now()) },
+        update: {},
+      });
+    } catch (e) {
+      if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) throw e;
+    }
     this.events.broadcast('history');
   }
 
