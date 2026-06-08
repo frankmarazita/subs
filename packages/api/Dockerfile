@@ -7,7 +7,7 @@ COPY packages/api/package.json ./packages/api/
 COPY packages/contracts/package.json ./packages/contracts/
 COPY packages/cli/package.json ./packages/cli/
 COPY packages/web/package.json ./packages/web/
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 FROM deps AS build
 COPY packages/api ./packages/api
@@ -20,7 +20,7 @@ COPY packages/api/package.json ./packages/api/
 COPY packages/contracts/package.json ./packages/contracts/
 COPY packages/cli/package.json ./packages/cli/
 COPY packages/web/package.json ./packages/web/
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --production --ignore-scripts
 RUN apk add --no-cache tini
 COPY --from=build /app/packages/api ./packages/api
 COPY --from=build /app/packages/contracts ./packages/contracts
