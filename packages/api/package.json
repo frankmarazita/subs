@@ -7,7 +7,6 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "postinstall": "bunx prisma generate",
     "build": "nest build",
     "start": "bun src/main.ts",
     "start:dev": "bun --watch src/main.ts",

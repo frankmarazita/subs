@@ -4,7 +4,7 @@ set -e
 ROOT=$(git rev-parse --show-toplevel)
 
 cd "$ROOT"
-bun install --ignore-scripts
+bun install
 
 cd "$ROOT/packages/api"
 DATABASE_URL="postgresql://localhost/dummy" bunx prisma generate
