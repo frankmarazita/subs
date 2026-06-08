@@ -4,5 +4,5 @@ set -e
 ROOT=$(git rev-parse --show-toplevel)
 
 cd "$ROOT"
-bun install
+bun install --ignore-scripts
 bun run --filter cli build
