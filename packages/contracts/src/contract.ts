@@ -35,6 +35,8 @@ export const contract = c.router({
         limit: z.coerce.number().int().min(1).max(200).default(50),
         includeShorts: z.coerce.boolean().optional(),
         playlistId: z.string().optional(),
+        search: z.string().optional(),
+        channel: z.string().optional(),
       }),
       responses: {
         200: z.object({

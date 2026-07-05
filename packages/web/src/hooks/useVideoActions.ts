@@ -61,7 +61,7 @@ export function useVideoActions() {
 
   const invalidateWatchLaterFeed = () =>
     queryClient.invalidateQueries({
-      queryKey: videosFeedKey(WATCH_LATER_PLAYLIST_ID),
+      queryKey: videosFeedKey({ playlistId: WATCH_LATER_PLAYLIST_ID }),
     });
 
   const markWatched = useIdsMutation(

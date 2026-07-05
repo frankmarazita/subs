@@ -146,6 +146,8 @@ export class VideosService {
     limit: number;
     includeShorts: boolean;
     playlistId?: string;
+    search?: string;
+    channel?: string;
   }): Promise<{ items: VideoDto[]; nextCursor: string | null }> {
     let decoded: { published: bigint; id: string } | null = null;
     if (opts.cursor !== undefined) {
@@ -159,6 +161,12 @@ export class VideosService {
       ...(opts.includeShorts ? {} : { isShort: false }),
       ...(opts.playlistId
         ? { playlists: { some: { playlistId: opts.playlistId } } }
+        : {}),
+      ...(opts.search
+        ? { title: { contains: opts.search, mode: 'insensitive' as const } }
+        : {}),
+      ...(opts.channel
+        ? { channel: { contains: opts.channel, mode: 'insensitive' as const } }
         : {}),
       ...(decoded
         ? {

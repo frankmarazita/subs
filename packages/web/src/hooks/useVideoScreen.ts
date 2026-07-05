@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { useVideosQuery } from './useVideosQuery';
+import { useVideosQuery, type VideosFeedFilters } from './useVideosQuery';
 import { useHistoryQuery } from './useHistoryQuery';
 import { useWatchLater } from './useWatchLater';
 import { useVideoActions } from './useVideoActions';
 
-export function useVideoScreen(playlistId?: string) {
+export function useVideoScreen(filters: VideosFeedFilters = {}) {
   const {
     data,
     isLoading,
@@ -12,7 +12,7 @@ export function useVideoScreen(playlistId?: string) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useVideosQuery(playlistId);
+  } = useVideosQuery(filters);
   const { data: history } = useHistoryQuery();
   const { data: watchLater } = useWatchLater();
   const { markWatched, markUnwatched, addWatchLater, removeWatchLater } = useVideoActions();

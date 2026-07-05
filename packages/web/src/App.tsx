@@ -10,12 +10,15 @@ import {
   Settings as SettingsIcon,
   RefreshCw,
   Loader2,
+  Search,
+  X,
 } from "lucide-react";
 import { queryClient } from "./queryClient";
 import { apiClient } from "./services/client";
 import { useConfigStore } from "./store/configStore";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useVideoScreen } from "./hooks/useVideoScreen";
+import { useDebouncedValue } from "./hooks/useDebouncedValue";
 import type { VideoItem } from "./types";
 import { VideoCard } from "./components/VideoCard";
 import { Settings } from "./components/Settings";
@@ -61,9 +64,13 @@ function RefreshButton() {
 
 function VideoList({
   filterWatchLater,
+  search,
+  channel,
   onWatch,
 }: {
   filterWatchLater?: boolean;
+  search?: string;
+  channel?: string;
   onWatch: (video: VideoItem) => void;
 }) {
   const {
@@ -77,7 +84,11 @@ function VideoList({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useVideoScreen(filterWatchLater ? WATCH_LATER_PLAYLIST_ID : undefined);
+  } = useVideoScreen({
+    playlistId: filterWatchLater ? WATCH_LATER_PLAYLIST_ID : undefined,
+    search,
+    channel,
+  });
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -139,7 +150,20 @@ function VideoList({
 
 function AppContent() {
   const [tab, setTab] = useState<Tab>("videos");
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebouncedValue(searchInput.trim(), 300);
   const useInternalPlayer = useConfigStore((s) => s.useInternalPlayer);
+
+  // "@channel" searches by channel; anything else searches by title.
+  const isChannelSearch = debouncedSearch.startsWith("@");
+  const searchTerm = isChannelSearch
+    ? debouncedSearch.slice(1)
+    : debouncedSearch;
+  const searchFilters = searchTerm
+    ? isChannelSearch
+      ? { channel: searchTerm }
+      : { search: searchTerm }
+    : {};
 
   const handleWatch = useCallback(
     (video: VideoItem) => {
@@ -160,13 +184,36 @@ function AppContent() {
   return (
     <div className="flex flex-col h-[100dvh] max-w-[600px] mx-auto bg-white">
       {tab === "videos" && (
-        <div className="flex items-center justify-between px-3 py-2 border-b border-[#e0e0e0]">
-          <span className="text-sm font-semibold text-[#333]">Subs</span>
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-[#e0e0e0]">
+          <div className="relative flex-1">
+            <Search
+              size={15}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none"
+            />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search titles, or @channel"
+              className="w-full pl-8 pr-8 py-1.5 text-sm bg-[#f0f0f0] rounded-md border-none outline-none text-[#333] placeholder:text-[#999]"
+            />
+            {searchInput && (
+              <button
+                onClick={() => setSearchInput("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#999] border-none bg-transparent cursor-pointer p-0.5 flex items-center"
+                title="Clear search"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
           <RefreshButton />
         </div>
       )}
       <div className="flex-1 overflow-y-auto [-webkit-overflow-scrolling:touch]">
-        {tab === "videos" && <VideoList onWatch={handleWatch} />}
+        {tab === "videos" && (
+          <VideoList {...searchFilters} onWatch={handleWatch} />
+        )}
         {tab === "watchLater" && (
           <VideoList filterWatchLater onWatch={handleWatch} />
         )}

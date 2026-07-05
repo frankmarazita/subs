@@ -12,7 +12,10 @@ import { useConfigStore } from '../store/configStore';
 const QUERY_KEYS: Record<string, readonly (readonly unknown[])[]> = {
   videos: [videosQueryKey],
   history: [historyQueryKey],
-  watchLater: [watchLaterQueryKey, videosFeedKey(WATCH_LATER_PLAYLIST_ID)],
+  watchLater: [
+    watchLaterQueryKey,
+    videosFeedKey({ playlistId: WATCH_LATER_PLAYLIST_ID }),
+  ],
 };
 
 export function useWebSocket() {
