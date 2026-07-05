@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { XMLParser } from 'fast-xml-parser';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -47,6 +52,32 @@ interface RssFeed {
   feed?: {
     entry?: RssEntry[];
   };
+}
+
+interface CursorPayload {
+  p: string;
+  i: string;
+}
+
+function encodeCursor(published: bigint, id: string): string {
+  const json = JSON.stringify({
+    p: published.toString(),
+    i: id,
+  } satisfies CursorPayload);
+  return Buffer.from(json, 'utf8').toString('base64url');
+}
+
+function decodeCursor(raw: string): { published: bigint; id: string } | null {
+  try {
+    const json = Buffer.from(raw, 'base64url').toString('utf8');
+    const parsed = JSON.parse(json) as CursorPayload;
+    if (typeof parsed.p !== 'string' || typeof parsed.i !== 'string') {
+      return null;
+    }
+    return { published: BigInt(parsed.p), id: parsed.i };
+  } catch {
+    return null;
+  }
 }
 
 function toDto(video: {
@@ -108,6 +139,47 @@ export class VideosService {
     });
 
     return videos.map(toDto);
+  }
+
+  async getVideosFeed(opts: {
+    cursor?: string;
+    limit: number;
+    includeShorts: boolean;
+  }): Promise<{ items: VideoDto[]; nextCursor: string | null }> {
+    let decoded: { published: bigint; id: string } | null = null;
+    if (opts.cursor !== undefined) {
+      decoded = decodeCursor(opts.cursor);
+      if (decoded === null) {
+        throw new BadRequestException('Invalid cursor');
+      }
+    }
+
+    const where = {
+      ...(opts.includeShorts ? {} : { isShort: false }),
+      ...(decoded
+        ? {
+            OR: [
+              { published: { lt: decoded.published } },
+              { published: decoded.published, id: { lt: decoded.id } },
+            ],
+          }
+        : {}),
+    };
+
+    const rows = await this.prisma.video.findMany({
+      where,
+      orderBy: [{ published: 'desc' }, { id: 'desc' }],
+      take: opts.limit + 1,
+    });
+
+    const hasMore = rows.length > opts.limit;
+    const page = hasMore ? rows.slice(0, opts.limit) : rows;
+    const last = page[page.length - 1];
+
+    return {
+      items: page.map(toDto),
+      nextCursor: hasMore && last ? encodeCursor(last.published, last.id) : null,
+    };
   }
 
   async refreshVideos(includeShorts = false): Promise<VideoDto[]> {

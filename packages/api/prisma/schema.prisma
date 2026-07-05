@@ -23,9 +23,9 @@ model Video {
   playlists    PlaylistVideo[]
   watchHistory WatchHistory?
 
-  @@index([published])
+  @@index([published, id])
+  @@index([isShort, published, id])
   @@index([cachedAt])
-  @@index([isShort])
   @@map("video")
 }
 

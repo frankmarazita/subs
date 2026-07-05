@@ -27,6 +27,22 @@ export const contract = c.router({
         200: z.array(VideoSchema),
       },
     },
+    getVideosFeed: {
+      method: "GET",
+      path: "/videos/feed",
+      query: z.object({
+        cursor: z.string().optional(),
+        limit: z.coerce.number().int().min(1).max(200).default(50),
+        includeShorts: z.coerce.boolean().optional(),
+      }),
+      responses: {
+        200: z.object({
+          items: z.array(VideoSchema),
+          nextCursor: z.string().nullable(),
+        }),
+        400: z.object({ message: z.string() }),
+      },
+    },
     refreshVideos: {
       method: "POST",
       path: "/videos/refresh",

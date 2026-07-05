@@ -16,6 +16,14 @@ export class VideosController {
         );
         return { status: 200 as const, body: videos };
       },
+      getVideosFeed: async ({ query }) => {
+        const feed = await this.videosService.getVideosFeed({
+          cursor: query.cursor,
+          limit: query.limit,
+          includeShorts: query.includeShorts ?? false,
+        });
+        return { status: 200 as const, body: feed };
+      },
       refreshVideos: async ({ query }) => {
         const videos = await this.videosService.refreshVideos(
           query.includeShorts ?? false,
