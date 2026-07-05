@@ -20,7 +20,7 @@ import type { VideoItem } from "./types";
 import { VideoCard } from "./components/VideoCard";
 import { Settings } from "./components/Settings";
 import { WatchScreen } from "./components/WatchScreen";
-import { videosQueryKey } from "./hooks/useVideosQuery";
+import { videosQueryKey, WATCH_LATER_PLAYLIST_ID } from "./hooks/useVideosQuery";
 
 const watchParams =
   window.location.pathname === "/watch"
@@ -28,8 +28,6 @@ const watchParams =
     : null;
 const watchVideoId = watchParams?.get("v") ?? null;
 const watchIsShort = watchParams?.get("short") === "true";
-
-const PAGE_SIZE = 30;
 
 type Tab = "videos" | "watchLater" | "settings";
 
@@ -69,43 +67,33 @@ function VideoList({
   onWatch: (video: VideoItem) => void;
 }) {
   const {
-    videos,
+    videos: filtered,
     isLoading,
     error,
     watchedIds,
     watchLaterIds,
     toggleWatched,
     toggleWatchLater,
-  } = useVideoScreen();
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useVideoScreen(filterWatchLater ? WATCH_LATER_PLAYLIST_ID : undefined);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  const filtered = filterWatchLater
-    ? videos?.filter((v) => watchLaterIds.has(v.videoId))
-    : videos;
-
-  const loadMore = useCallback(() => {
-    if (filtered && visibleCount < filtered.length) {
-      setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length));
-    }
-  }, [filtered, visibleCount]);
-
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [filterWatchLater]);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) loadMore();
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
       },
       { threshold: 0.1 }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [loadMore]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (isLoading)
     return (
@@ -120,18 +108,16 @@ function VideoList({
     );
   }
 
-  if (!filtered?.length)
+  if (!filtered.length && !hasNextPage)
     return (
       <div className="py-10 px-4 text-center text-sm text-gray-400">
         No videos
       </div>
     );
 
-  const visible = filtered.slice(0, visibleCount);
-
   return (
     <div className="flex flex-col">
-      {visible.map((video) => (
+      {filtered.map((video) => (
         <VideoCard
           key={video.videoId}
           video={video}
@@ -142,7 +128,7 @@ function VideoList({
           onWatch={onWatch}
         />
       ))}
-      {visibleCount < filtered.length && (
+      {hasNextPage && (
         <div ref={sentinelRef} className="py-6 flex justify-center text-[#888]">
           <Loader2 size={20} className="animate-spin" />
         </div>

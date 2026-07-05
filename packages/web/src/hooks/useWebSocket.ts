@@ -1,14 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { videosQueryKey } from './useVideosQuery';
+import {
+  videosQueryKey,
+  videosFeedKey,
+  WATCH_LATER_PLAYLIST_ID,
+} from './useVideosQuery';
 import { historyQueryKey } from './useHistoryQuery';
 import { watchLaterQueryKey } from './useWatchLater';
 import { useConfigStore } from '../store/configStore';
 
-const QUERY_KEYS: Record<string, readonly string[]> = {
-  videos: videosQueryKey,
-  history: historyQueryKey,
-  watchLater: watchLaterQueryKey,
+const QUERY_KEYS: Record<string, readonly (readonly unknown[])[]> = {
+  videos: [videosQueryKey],
+  history: [historyQueryKey],
+  watchLater: [watchLaterQueryKey, videosFeedKey(WATCH_LATER_PLAYLIST_ID)],
 };
 
 export function useWebSocket() {
@@ -27,8 +31,10 @@ export function useWebSocket() {
       wsRef.current = ws;
 
       ws.onmessage = (event) => {
-        const key = QUERY_KEYS[String(event.data)];
-        if (key) queryClient.invalidateQueries({ queryKey: key });
+        const keys = QUERY_KEYS[String(event.data)];
+        if (keys)
+          for (const key of keys)
+            queryClient.invalidateQueries({ queryKey: key });
       };
 
       ws.onclose = () => {
