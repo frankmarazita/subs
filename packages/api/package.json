@@ -9,9 +9,9 @@
   "scripts": {
     "build": "nest build",
     "start": "bun src/main.ts",
-    "start:dev": "bun --watch src/main.ts",
-    "start:debug": "bun --inspect --watch src/main.ts",
-    "start:prod": "bun dist/src/main.js",
+    "dev": "bun --watch src/main.ts",
+    "debug": "bun --inspect --watch src/main.ts",
+    "prod": "bun dist/src/main.js",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "generate": "bun --bun x prisma generate",
     "migrate": "bun --bun x prisma migrate deploy"

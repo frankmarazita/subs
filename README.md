@@ -11,7 +11,7 @@ Three packages in a monorepo: `api` is a NestJS backend backed by PostgreSQL tha
 1. Copy `packages/api/.env.example` to `packages/api/.env` and set `DATABASE_URL`
 2. Install dependencies: `bun install`
 3. Generate the Prisma client: `bun run --filter api generate`
-4. Start the API: `bun run --filter api start:dev`
+4. Start the API: `bun run --filter api dev`
 
 ## Running the API
 

@@ -13,6 +13,7 @@ FROM deps AS build
 COPY packages/api ./packages/api
 COPY packages/contracts ./packages/contracts
 RUN cd packages/api && DATABASE_URL=postgresql://dummy/dummy bunx prisma generate
+RUN cd packages/api && bun run build
 
 FROM base AS release
 COPY package.json bun.lock ./
@@ -26,4 +27,4 @@ COPY --from=build /app/packages/api ./packages/api
 COPY --from=build /app/packages/contracts ./packages/contracts
 USER bun
 EXPOSE 3000
-ENTRYPOINT ["/sbin/tini", "--", "sh", "-c", "cd /app/packages/api && bunx prisma migrate deploy && exec bun src/main.ts"]
+ENTRYPOINT ["/sbin/tini", "--", "sh", "-c", "cd /app/packages/api && bunx prisma migrate deploy && exec bun dist/src/main.js"]
