@@ -21,6 +21,7 @@ export class VideosController {
           cursor: query.cursor,
           limit: query.limit,
           includeShorts: query.includeShorts ?? false,
+          playlistId: query.playlistId,
         });
         return { status: 200 as const, body: feed };
       },

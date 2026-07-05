@@ -145,6 +145,7 @@ export class VideosService {
     cursor?: string;
     limit: number;
     includeShorts: boolean;
+    playlistId?: string;
   }): Promise<{ items: VideoDto[]; nextCursor: string | null }> {
     let decoded: { published: bigint; id: string } | null = null;
     if (opts.cursor !== undefined) {
@@ -156,6 +157,9 @@ export class VideosService {
 
     const where = {
       ...(opts.includeShorts ? {} : { isShort: false }),
+      ...(opts.playlistId
+        ? { playlists: { some: { playlistId: opts.playlistId } } }
+        : {}),
       ...(decoded
         ? {
             OR: [
