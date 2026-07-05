@@ -7,7 +7,7 @@ export default defineConfig({
   preset: {
     ...minimal2023Preset,
     apple: {
-      sizes: [[180, 180] as any],
+      sizes: [180],
     },
   },
   images: ["public/icon.svg"],
