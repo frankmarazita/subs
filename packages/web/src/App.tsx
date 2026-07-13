@@ -12,6 +12,7 @@ import {
   Loader2,
   Search,
   X,
+  History,
 } from "lucide-react";
 import { queryClient } from "./queryClient";
 import { apiClient } from "./services/client";
@@ -67,11 +68,13 @@ function VideoList({
   search,
   channel,
   onWatch,
+  registerJumpToLastWatched,
 }: {
   filterWatchLater?: boolean;
   search?: string;
   channel?: string;
   onWatch: (video: VideoItem) => void;
+  registerJumpToLastWatched?: (fn: (() => void | Promise<void>) | null) => void;
 }) {
   const {
     videos: filtered,
@@ -90,6 +93,45 @@ function VideoList({
     channel,
   });
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const videosRef = useRef(filtered);
+  const watchedRef = useRef(watchedIds);
+  const hasNextRef = useRef(hasNextPage);
+  videosRef.current = filtered;
+  watchedRef.current = watchedIds;
+  hasNextRef.current = hasNextPage;
+
+  // The feed is published-desc, so the first watched video from the top is the
+  // most-recently-released one watched. Page forward until it loads, then
+  // scroll it to the bottom of the viewport.
+  useEffect(() => {
+    if (!registerJumpToLastWatched) return;
+
+    async function jump() {
+      const findIn = (videos: { videoId: string }[]) =>
+        videos.find((v) => watchedRef.current.has(v.videoId));
+
+      let target = findIn(videosRef.current);
+      let canPage = hasNextRef.current;
+      while (!target && canPage) {
+        const res = await fetchNextPage();
+        target = findIn((res.data?.pages ?? []).flatMap((p) => p.items));
+        canPage = res.hasNextPage ?? false;
+      }
+      if (!target) return;
+      const targetId = target.videoId;
+
+      requestAnimationFrame(() => {
+        cardRefs.current
+          .get(targetId)
+          ?.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    }
+
+    registerJumpToLastWatched(jump);
+    return () => registerJumpToLastWatched(null);
+  }, [registerJumpToLastWatched, fetchNextPage]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -131,6 +173,10 @@ function VideoList({
       {filtered.map((video) => (
         <VideoCard
           key={video.videoId}
+          ref={(el) => {
+            if (el) cardRefs.current.set(video.videoId, el);
+            else cardRefs.current.delete(video.videoId);
+          }}
           video={video}
           isWatched={watchedIds.has(video.videoId)}
           isWatchLater={watchLaterIds.has(video.videoId)}
@@ -153,6 +199,22 @@ function AppContent() {
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebouncedValue(searchInput.trim(), 300);
   const useInternalPlayer = useConfigStore((s) => s.useInternalPlayer);
+  const jumpRef = useRef<(() => void | Promise<void>) | null>(null);
+  const [isJumping, setIsJumping] = useState(false);
+
+  const handleJump = useCallback(async () => {
+    if (!jumpRef.current) return;
+    setIsJumping(true);
+    try {
+      await jumpRef.current();
+    } finally {
+      setIsJumping(false);
+    }
+  }, []);
+
+  const registerJump = useCallback((fn: (() => void | Promise<void>) | null) => {
+    jumpRef.current = fn;
+  }, []);
 
   // "@channel" searches by channel; anything else searches by title.
   const isChannelSearch = debouncedSearch.startsWith("@");
@@ -207,12 +269,24 @@ function AppContent() {
               </button>
             )}
           </div>
+          <button
+            className="p-2 rounded-lg text-[#888] disabled:opacity-40 [-webkit-tap-highlight-color:transparent] active:bg-[#f0f0f0]"
+            onClick={handleJump}
+            disabled={isJumping}
+            title="Jump to last watched"
+          >
+            <History size={18} className={isJumping ? "animate-pulse" : ""} />
+          </button>
           <RefreshButton />
         </div>
       )}
       <div className="flex-1 overflow-y-auto [-webkit-overflow-scrolling:touch]">
         {tab === "videos" && (
-          <VideoList {...searchFilters} onWatch={handleWatch} />
+          <VideoList
+            {...searchFilters}
+            onWatch={handleWatch}
+            registerJumpToLastWatched={registerJump}
+          />
         )}
         {tab === "watchLater" && (
           <VideoList filterWatchLater onWatch={handleWatch} />

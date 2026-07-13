@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Eye, EyeOff, Check, Bookmark, BookmarkPlus } from "lucide-react";
 import type { VideoItem } from "../types";
 
@@ -10,21 +11,24 @@ interface Props {
   onWatch: (video: VideoItem) => void;
 }
 
-export function VideoCard({
-  video,
-  isWatched,
-  isWatchLater,
-  onToggleWatched,
-  onToggleWatchLater,
-  onWatch,
-}: Props) {
+export const VideoCard = forwardRef<HTMLDivElement, Props>(function VideoCard(
+  {
+    video,
+    isWatched,
+    isWatchLater,
+    onToggleWatched,
+    onToggleWatchLater,
+    onWatch,
+  },
+  ref,
+) {
   function openVideo() {
     if (!isWatched) onToggleWatched();
     onWatch(video);
   }
 
   return (
-    <div className={`flex items-start gap-3 p-3 cursor-pointer select-none [-webkit-tap-highlight-color:transparent] active:bg-[#f5f5f5] border-b border-[#e0e0e0] ${isWatched ? "bg-[#fafafa]" : "bg-white"}`} onClick={openVideo}>
+    <div ref={ref} className={`flex items-start gap-3 p-3 cursor-pointer select-none [-webkit-tap-highlight-color:transparent] active:bg-[#f5f5f5] border-b border-[#e0e0e0] ${isWatched ? "bg-[#fafafa]" : "bg-white"}`} onClick={openVideo}>
       <div className="relative flex-shrink-0 w-[120px] h-[68px] rounded overflow-hidden bg-[#e0e0e0]">
         {video.thumbnailUrl ? (
           <img
@@ -82,4 +86,4 @@ export function VideoCard({
       </div>
     </div>
   );
-}
+});
