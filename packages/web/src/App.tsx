@@ -128,11 +128,21 @@ function VideoList({
       if (!target) return;
       const targetId = target.videoId;
 
-      requestAnimationFrame(() => {
-        cardRefs.current
-          .get(targetId)
-          ?.scrollIntoView({ behavior: "smooth", block: "end" });
-      });
+      // The target card may not be in the DOM yet (freshly-fetched page), so
+      // wait for its element before scrolling. Two frames after it appears lets
+      // layout settle, avoiding the dropped-first-scroll seen on mobile.
+      let tries = 0;
+      const doScroll = () => {
+        const el = cardRefs.current.get(targetId);
+        if (el) {
+          requestAnimationFrame(() =>
+            el.scrollIntoView({ behavior: "smooth", block: "end" }),
+          );
+        } else if (tries++ < 10) {
+          requestAnimationFrame(doScroll);
+        }
+      };
+      requestAnimationFrame(doScroll);
     }
 
     registerJumpToLastWatched(jump);
