@@ -69,9 +69,14 @@ Config is stored at `~/.config/subs/config.json`:
     "thumbnailPreview": true,
     "autoRefresh": true
   },
-  "apiUrl": "http://localhost:3000"
+  "apiUrl": "http://localhost:3000",
+  "viewerUrl": "http://localhost:3000/watch?v={videoId}"
 }
 ```
+
+`viewerUrl` sets where the `v` key opens videos. The `{videoId}` placeholder is
+replaced with the URL-encoded video ID, so any player or proxy path shape works.
+When omitted, videos open at `<apiUrl>/watch?v=<videoId>`.
 
 The CLI watches this file for live changes.
 

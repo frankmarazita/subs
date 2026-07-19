@@ -12,6 +12,7 @@ import {
 import { useHistoryQuery } from "../hooks/useHistoryQuery";
 import type { VideoItem } from "../types";
 import { getApiBaseUrl } from "../services/api-client";
+import { buildViewerUrl } from "../utils/config";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useEffect, useState } from "react";
 
@@ -111,8 +112,8 @@ export function App() {
   };
 
   const handleVideoSelectInViewer = (video: VideoItem) => {
-    const v = video.link.split("v=")[1] ?? "";
-    openUrl(`${getApiBaseUrl()}/watch?v=${encodeURIComponent(v)}`);
+    const config = useConfigStore.getState().config;
+    openUrl(buildViewerUrl(config, getApiBaseUrl(), video.videoId));
   };
 
   const handleExit = () => {

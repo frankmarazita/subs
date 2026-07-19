@@ -9,6 +9,7 @@ const AppConfigSchema = z.object({
     autoRefresh: z.boolean(),
   }),
   apiUrl: z.union([z.string(), z.array(z.string())]).optional(),
+  viewerUrl: z.string().optional(),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
@@ -68,6 +69,16 @@ export function loadConfig(): AppConfig {
 export function getApiUrls(config: AppConfig): string[] {
   if (!config.apiUrl) return ["http://localhost:3000"];
   return Array.isArray(config.apiUrl) ? config.apiUrl : [config.apiUrl];
+}
+
+export function buildViewerUrl(
+  config: AppConfig,
+  apiBaseUrl: string,
+  videoId: string
+): string {
+  const encoded = encodeURIComponent(videoId);
+  if (!config.viewerUrl) return `${apiBaseUrl}/watch?v=${encoded}`;
+  return config.viewerUrl.replaceAll("{videoId}", encoded);
 }
 
 export function saveConfig(config: AppConfig): void {
