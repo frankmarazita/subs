@@ -95,12 +95,18 @@ function VideoList({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // Latest render values, kept in refs so the once-registered jump handler
+  // always reads current data without re-registering on every change.
   const videosRef = useRef(filtered);
   const watchedRef = useRef(watchedIds);
   const hasNextRef = useRef(hasNextPage);
-  videosRef.current = filtered;
-  watchedRef.current = watchedIds;
-  hasNextRef.current = hasNextPage;
+  const fetchNextPageRef = useRef(fetchNextPage);
+  useEffect(() => {
+    videosRef.current = filtered;
+    watchedRef.current = watchedIds;
+    hasNextRef.current = hasNextPage;
+    fetchNextPageRef.current = fetchNextPage;
+  });
 
   // The feed is published-desc, so the first watched video from the top is the
   // most-recently-released one watched. Page forward until it loads, then
@@ -115,7 +121,7 @@ function VideoList({
       let target = findIn(videosRef.current);
       let canPage = hasNextRef.current;
       while (!target && canPage) {
-        const res = await fetchNextPage();
+        const res = await fetchNextPageRef.current();
         target = findIn((res.data?.pages ?? []).flatMap((p) => p.items));
         canPage = res.hasNextPage ?? false;
       }
@@ -131,7 +137,7 @@ function VideoList({
 
     registerJumpToLastWatched(jump);
     return () => registerJumpToLastWatched(null);
-  }, [registerJumpToLastWatched, fetchNextPage]);
+  }, [registerJumpToLastWatched]);
 
   useEffect(() => {
     const el = sentinelRef.current;
