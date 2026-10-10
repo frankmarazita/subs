@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+const DEFAULT_HOST: string =
+  import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 interface ConfigState {
   hosts: string[];
   activeHostIndex: number;
@@ -15,7 +18,7 @@ interface ConfigState {
 export const useConfigStore = create<ConfigState>()(
   persist(
     (set, get) => ({
-      hosts: ["http://localhost:3000"],
+      hosts: [DEFAULT_HOST],
       activeHostIndex: 0,
       useInternalPlayer: true,
       addHost: (url) => set((state) => ({ hosts: [...state.hosts, url] })),
@@ -32,7 +35,7 @@ export const useConfigStore = create<ConfigState>()(
       setUseInternalPlayer: (value) => set({ useInternalPlayer: value }),
       getActiveHost: () => {
         const { hosts, activeHostIndex } = get();
-        return hosts[activeHostIndex] ?? "http://localhost:3000";
+        return hosts[activeHostIndex] ?? DEFAULT_HOST;
       },
     }),
     { name: "subs-config" }
