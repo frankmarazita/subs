@@ -1,9 +1,13 @@
-export { contract } from './contract.js';
+export { contract } from "./contract.js";
 export {
   VideoSchema,
   SubscriptionSchema,
   IdsResponseSchema,
+  SubtitleCueSchema,
+  SubtitlesSchema,
   type VideoDto,
   type SubscriptionDto,
   type IdsResponse,
-} from './schemas.js';
+  type SubtitleCueDto,
+  type SubtitlesDto,
+} from "./schemas.js";

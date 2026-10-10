@@ -7,6 +7,7 @@ import { WatchLaterModule } from './watch-later/watch-later.module.js';
 import { HistoryModule } from './history/history.module.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
 import { EventsModule } from './events/events.module.js';
+import { SubtitlesModule } from './subtitles/subtitles.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EventsModule } from './events/events.module.js';
     WatchLaterModule,
     HistoryModule,
     SubscriptionsModule,
+    SubtitlesModule,
   ],
   controllers: [AppController],
 })

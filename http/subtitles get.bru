@@ -1,0 +1,19 @@
+meta {
+  name: subtitles get
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{url}}/videos/:videoId/subtitles
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~lang: en
+}
+
+params:path {
+  videoId: jNQXAC9IVRw
+}

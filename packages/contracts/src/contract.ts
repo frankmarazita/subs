@@ -4,6 +4,7 @@ import {
   VideoSchema,
   SubscriptionSchema,
   IdsResponseSchema,
+  SubtitlesSchema,
 } from "./schemas.js";
 
 const c = initContract();
@@ -57,6 +58,27 @@ export const contract = c.router({
       responses: {
         200: z.array(VideoSchema),
         409: z.object({ message: z.string() }),
+      },
+    },
+  }),
+  subtitles: c.router({
+    get: {
+      method: "GET",
+      path: "/videos/:videoId/subtitles",
+      pathParams: z.object({
+        videoId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
+      }),
+      query: z.object({
+        lang: z
+          .string()
+          .regex(/^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8})*$/)
+          .default("en"),
+      }),
+      responses: {
+        200: SubtitlesSchema,
+        404: z.object({ message: z.string() }),
+        429: z.object({ message: z.string() }),
+        502: z.object({ message: z.string() }),
       },
     },
   }),

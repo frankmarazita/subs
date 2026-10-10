@@ -22,7 +22,10 @@ COPY packages/contracts/package.json ./packages/contracts/
 COPY packages/cli/package.json ./packages/cli/
 COPY packages/web/package.json ./packages/web/
 RUN bun install --frozen-lockfile --production
-RUN apk add --no-cache tini
+ARG TARGETARCH
+RUN apk add --no-cache tini deno \
+  && wget -qO /usr/local/bin/yt-dlp "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_musllinux$([ "$TARGETARCH" = arm64 ] && echo _aarch64)" \
+  && chmod +x /usr/local/bin/yt-dlp
 COPY --from=build /app/packages/api ./packages/api
 COPY --from=build /app/packages/contracts ./packages/contracts
 USER bun

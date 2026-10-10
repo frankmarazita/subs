@@ -13,6 +13,8 @@ Three packages in a monorepo: `api` is a NestJS backend backed by PostgreSQL tha
 3. Generate the Prisma client: `bun run --filter api generate`
 4. Start the API: `bun run --filter api dev`
 
+Fetching subtitles requires [yt-dlp](https://github.com/yt-dlp/yt-dlp) on your `PATH` (or set `YTDLP_PATH`). The Docker image bundles it.
+
 ## Running the API
 
 Requires a PostgreSQL database.
