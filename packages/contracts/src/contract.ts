@@ -13,7 +13,8 @@ export const contract = c.router({
     method: "GET",
     path: "/health",
     responses: {
-      200: z.object({ status: z.string() }),
+      200: z.object({ status: z.literal("ok") }),
+      503: z.object({ status: z.literal("error") }),
     },
   },
   videos: c.router({

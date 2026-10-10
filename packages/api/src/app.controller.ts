@@ -1,6 +1,7 @@
 import { Controller, Get, Header } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { contract } from '@subs/contracts';
+import { PrismaService } from './prisma/prisma.service.js';
 
 const WATCH_HTML = `<!doctype html>
 <html lang="en">
@@ -31,10 +32,17 @@ const WATCH_HTML = `<!doctype html>
 
 @Controller()
 export class AppController {
+  constructor(private readonly prisma: PrismaService) {}
+
   @TsRestHandler(contract.health)
   async health() {
     return tsRestHandler(contract.health, async () => {
-      return { status: 200 as const, body: { status: 'ok' } };
+      try {
+        await this.prisma.$queryRaw`SELECT 1`;
+        return { status: 200 as const, body: { status: 'ok' as const } };
+      } catch {
+        return { status: 503 as const, body: { status: 'error' as const } };
+      }
     });
   }
 
