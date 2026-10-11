@@ -23,8 +23,13 @@ COPY packages/cli/package.json ./packages/cli/
 COPY packages/web/package.json ./packages/web/
 RUN bun install --frozen-lockfile --production
 ARG TARGETARCH
+ARG YTDLP_VERSION=2026.08.19
+ARG YTDLP_SHA256_AMD64=f3dec9cfeaf304cec98290fe41c6ad465d4b747d302473559643e7af24929722
+ARG YTDLP_SHA256_ARM64=17b164c4d258be92bb1ad146cb7c336b783aedb380814aabbcb7d52937f77e57
 RUN apk add --no-cache tini deno \
-  && wget -qO /usr/local/bin/yt-dlp "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_musllinux$([ "$TARGETARCH" = arm64 ] && echo _aarch64)" \
+  && if [ "$TARGETARCH" = arm64 ]; then asset=yt-dlp_musllinux_aarch64 sha=$YTDLP_SHA256_ARM64; else asset=yt-dlp_musllinux sha=$YTDLP_SHA256_AMD64; fi \
+  && wget -qO /usr/local/bin/yt-dlp "https://github.com/yt-dlp/yt-dlp/releases/download/$YTDLP_VERSION/$asset" \
+  && echo "$sha  /usr/local/bin/yt-dlp" | sha256sum -c - \
   && chmod +x /usr/local/bin/yt-dlp
 COPY --from=build /app/packages/api ./packages/api
 COPY --from=build /app/packages/contracts ./packages/contracts
