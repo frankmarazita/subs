@@ -1,17 +1,29 @@
 # subs
 
-A terminal-based YouTube subscription manager.
+A self-hosted YouTube subscription manager, without the algorithm. Follow channels, see their latest uploads in chronological order, and track what you've watched from a terminal UI or a mobile-friendly web app.
+
+## Screenshots
+
+### CLI
+
+![subs CLI showing the video feed with a thumbnail preview](docs/images/cli-main.png)
+
+### Web
+
+<p align="center">
+  <img src="docs/images/web.png" alt="subs web app showing the video feed on mobile" width="320">
+</p>
 
 ## Architecture
 
-Three packages in a monorepo: `api` is a NestJS backend backed by PostgreSQL that fetches videos from YouTube RSS feeds. `cli` is a React Ink terminal UI compiled to a standalone binary. `contracts` holds the shared ts-rest API types used by both.
+Four packages in a monorepo: `api` is a NestJS backend backed by PostgreSQL that fetches videos from YouTube RSS feeds. `cli` is a React Ink terminal UI compiled to a standalone binary. `web` is a React PWA for browsing on desktop or phone. `contracts` holds the shared ts-rest API types used by the others.
 
 ## Local Development
 
 1. Copy `packages/api/.env.example` to `packages/api/.env` and set `DATABASE_URL`
 2. Install dependencies: `bun install`
 3. Generate the Prisma client: `bun run --filter api generate`
-4. Start the API: `bun run --filter api dev`
+4. Start the API and web app: `bun run dev`
 
 Fetching subtitles requires [yt-dlp](https://github.com/yt-dlp/yt-dlp) on your `PATH` (or set `YTDLP_PATH`). The Docker image bundles it.
 
@@ -23,7 +35,7 @@ Requires a PostgreSQL database.
 docker run \
   -e DATABASE_URL="postgresql://user:pass@host/db" \
   -p 3000:3000 \
-  ghcr.io/frankmarazita/subs:latest
+  ghcr.io/frankmarazita/subs-api:latest
 ```
 
 The container runs migrations automatically on startup.
@@ -34,7 +46,7 @@ Download the `subs` binary from the latest CI artifact, or build it yourself:
 
 ```bash
 bun run --filter cli build
-# outputs: packages/cli/subs
+# outputs: packages/cli/dist/subs
 ```
 
 Run it:
@@ -44,6 +56,14 @@ Run it:
 ```
 
 By default it connects to the API at `http://localhost:3000`. Override via config (see below).
+
+## Running the web app
+
+```bash
+docker run -p 8080:80 ghcr.io/frankmarazita/subs-web:latest
+```
+
+The web app connects to `http://localhost:3000` by default (or `VITE_API_URL` when set at build time). Additional API hosts can be added and switched between from the Settings tab. It can be installed as a PWA from the browser.
 
 ## Keyboard controls
 
