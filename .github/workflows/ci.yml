@@ -69,7 +69,8 @@ jobs:
           IMAGE=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-api
           docker build . --file packages/api/Dockerfile \
             --tag $IMAGE:latest \
-            --tag $IMAGE:${{ steps.sha.outputs.short }}
+            --tag $IMAGE:${{ steps.sha.outputs.short }} \
+            --provenance=false --sbom=false
 
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -115,7 +116,8 @@ jobs:
           IMAGE=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-web
           docker build . --file packages/web/Dockerfile \
             --tag $IMAGE:latest \
-            --tag $IMAGE:${{ steps.sha.outputs.short }}
+            --tag $IMAGE:${{ steps.sha.outputs.short }} \
+            --provenance=false --sbom=false
 
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
