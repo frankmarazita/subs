@@ -4,15 +4,19 @@ import { persist } from "zustand/middleware";
 const DEFAULT_HOST: string =
   import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+export type Theme = "system" | "light" | "dark";
+
 interface ConfigState {
   hosts: string[];
   activeHostIndex: number;
   useInternalPlayer: boolean;
+  theme: Theme;
   addHost: (url: string) => void;
   removeHost: (index: number) => void;
   setActiveHost: (index: number) => void;
   getActiveHost: () => string;
   setUseInternalPlayer: (value: boolean) => void;
+  setTheme: (theme: Theme) => void;
 }
 
 export const useConfigStore = create<ConfigState>()(
@@ -21,6 +25,7 @@ export const useConfigStore = create<ConfigState>()(
       hosts: [DEFAULT_HOST],
       activeHostIndex: 0,
       useInternalPlayer: true,
+      theme: "system",
       addHost: (url) => set((state) => ({ hosts: [...state.hosts, url] })),
       removeHost: (index) =>
         set((state) => {
@@ -33,6 +38,7 @@ export const useConfigStore = create<ConfigState>()(
         }),
       setActiveHost: (index) => set({ activeHostIndex: index }),
       setUseInternalPlayer: (value) => set({ useInternalPlayer: value }),
+      setTheme: (theme) => set({ theme }),
       getActiveHost: () => {
         const { hosts, activeHostIndex } = get();
         return hosts[activeHostIndex] ?? DEFAULT_HOST;

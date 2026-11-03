@@ -20,6 +20,7 @@ import { useConfigStore } from "./store/configStore";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useVideoScreen } from "./hooks/useVideoScreen";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
+import { useTheme } from "./hooks/useTheme";
 import type { VideoItem } from "./types";
 import { VideoCard } from "./components/VideoCard";
 import { Settings } from "./components/Settings";
@@ -53,7 +54,7 @@ function RefreshButton() {
 
   return (
     <button
-      className="p-2 rounded-lg text-[#888] disabled:opacity-40 [-webkit-tap-highlight-color:transparent] active:bg-[#f0f0f0]"
+      className="p-2 rounded-lg text-[#888] disabled:opacity-40 [-webkit-tap-highlight-color:transparent] active:bg-[#f0f0f0] dark:text-[#aaa] dark:active:bg-[#2a2a2a]"
       onClick={() => mutate()}
       disabled={isPending}
       title="Refresh videos"
@@ -173,13 +174,13 @@ function VideoList({
   if (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return (
-      <div className="py-10 px-4 text-center text-sm text-red-700">{msg}</div>
+      <div className="py-10 px-4 text-center text-sm text-red-700 dark:text-red-400">{msg}</div>
     );
   }
 
   if (!filtered.length && !hasNextPage)
     return (
-      <div className="py-10 px-4 text-center text-sm text-gray-400">
+      <div className="py-10 px-4 text-center text-sm text-gray-400 dark:text-gray-500">
         No videos
       </div>
     );
@@ -211,6 +212,7 @@ function VideoList({
 }
 
 function AppContent() {
+  useTheme();
   const [tab, setTab] = useState<Tab>("videos");
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebouncedValue(searchInput.trim(), 300);
@@ -257,12 +259,12 @@ function AppContent() {
   );
 
   const tabClass = (t: Tab) =>
-    `flex-1 flex flex-col items-center gap-[3px] py-2.5 border-0 bg-transparent cursor-pointer text-[11px] [-webkit-tap-highlight-color:transparent] ${tab === t ? "text-[#2196f3]" : "text-[#888]"}`;
+    `flex-1 flex flex-col items-center gap-[3px] py-2.5 border-0 bg-transparent cursor-pointer text-[11px] [-webkit-tap-highlight-color:transparent] ${tab === t ? "text-[#2196f3] dark:text-[#64b5f6]" : "text-[#888] dark:text-[#aaa]"}`;
 
   return (
-    <div className="flex flex-col h-[100dvh] max-w-[600px] mx-auto bg-white">
+    <div className="flex flex-col h-[100dvh] max-w-[600px] mx-auto bg-white dark:bg-[#121212]">
       {tab === "videos" && (
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-[#e0e0e0]">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-[#e0e0e0] dark:border-[#2a2a2a]">
           <div className="relative flex-1">
             <Search
               size={15}
@@ -273,7 +275,7 @@ function AppContent() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search titles, or @channel"
-              className="w-full pl-8 pr-8 py-1.5 text-sm bg-[#f0f0f0] rounded-md border-none outline-none text-[#333] placeholder:text-[#999]"
+              className="w-full pl-8 pr-8 py-1.5 text-sm bg-[#f0f0f0] rounded-md border-none outline-none text-[#333] placeholder:text-[#999] dark:bg-[#2a2a2a] dark:text-[#eee] dark:placeholder:text-[#777]"
             />
             {searchInput && (
               <button
@@ -286,7 +288,7 @@ function AppContent() {
             )}
           </div>
           <button
-            className="p-2 rounded-lg text-[#888] disabled:opacity-40 [-webkit-tap-highlight-color:transparent] active:bg-[#f0f0f0]"
+            className="p-2 rounded-lg text-[#888] disabled:opacity-40 [-webkit-tap-highlight-color:transparent] active:bg-[#f0f0f0] dark:text-[#aaa] dark:active:bg-[#2a2a2a]"
             onClick={handleJump}
             disabled={isJumping}
             title="Jump to last watched"
@@ -309,7 +311,7 @@ function AppContent() {
         )}
         {tab === "settings" && <Settings />}
       </div>
-      <nav className="flex border-t border-[#e0e0e0] bg-white pb-[env(safe-area-inset-bottom)]">
+      <nav className="flex border-t border-[#e0e0e0] bg-white dark:border-[#2a2a2a] dark:bg-[#121212] pb-[env(safe-area-inset-bottom)]">
         <button className={tabClass("videos")} onClick={() => setTab("videos")}>
           <Play size={20} /> Videos
         </button>
