@@ -27,6 +27,8 @@ Four packages in a monorepo: `api` is a NestJS backend backed by PostgreSQL that
 
 Fetching subtitles requires [yt-dlp](https://github.com/yt-dlp/yt-dlp) on your `PATH` (or set `YTDLP_PATH`). The Docker image bundles it.
 
+Error reporting uses [Sentry](https://docs.sentry.io/platforms/javascript/guides/nestjs/) via `@sentry/nestjs` and is off unless `SENTRY_DSN` is set. Optional: `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, and `SENTRY_TRACES_SAMPLE_RATE` (defaults to `0`).
+
 ## Running the API
 
 Requires a PostgreSQL database.

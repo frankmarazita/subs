@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -11,6 +13,7 @@ import { SubtitlesModule } from './subtitles/subtitles.module.js';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ScheduleModule.forRoot(),
     PrismaModule,
     EventsModule,
@@ -21,5 +24,6 @@ import { SubtitlesModule } from './subtitles/subtitles.module.js';
     SubtitlesModule,
   ],
   controllers: [AppController],
+  providers: [{ provide: APP_FILTER, useClass: SentryGlobalFilter }],
 })
 export class AppModule {}

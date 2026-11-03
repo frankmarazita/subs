@@ -25,6 +25,7 @@
     "@nestjs/websockets": "^11.1.15",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "@sentry/nestjs": "^11.10.0",
     "@subs/contracts": "workspace:*",
     "@ts-rest/nest": "^3.52.1",
     "fast-xml-parser": "^5.7.2",
